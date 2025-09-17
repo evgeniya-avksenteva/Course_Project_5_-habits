@@ -5,8 +5,11 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
 
 from habits.models import Habit
-from habits.validators import (validate_associated_habits,
-                               validate_periodicity, validate_time_to_complete)
+from habits.validators import (
+    validate_associated_habits,
+    validate_periodicity,
+    validate_time_to_complete,
+)
 
 
 class ValidatorsTest(TestCase):

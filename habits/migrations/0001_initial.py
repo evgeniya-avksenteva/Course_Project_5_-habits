@@ -8,28 +8,102 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Habit',
+            name="Habit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('place', models.CharField(blank=True, help_text='Укажите место', max_length=255, null=True, verbose_name='Место')),
-                ('time', models.TimeField(help_text='Укажите время выполнения привычки', verbose_name='Время')),
-                ('action', models.CharField(help_text='Укажите действие', max_length=255, verbose_name='Действие')),
-                ('is_pleasant_habit', models.BooleanField(default=False, help_text='Отметьте, если привычка является приятной', verbose_name='Признак приятной привычки')),
-                ('periodicity', models.PositiveIntegerField(default=1, help_text='Через сколько дней повторять привычку', validators=[habits.validators.validate_periodicity], verbose_name='Периодичность (в днях)')),
-                ('reward', models.CharField(blank=True, help_text='Укажите вознаграждение', max_length=255, verbose_name='Вознаграждение')),
-                ('time_to_complete', models.DurationField(help_text='Укажите предполагаемое время на выполнение привычки', validators=[habits.validators.validate_time_to_complete], verbose_name='Время на выполнение')),
-                ('is_public', models.BooleanField(default=False, help_text='Отметьте, если привычка общедоступна', verbose_name='Признак публичности')),
-                ('associated_habits', models.ManyToManyField(blank=True, help_text='Укажите связанные привычки', to='habits.habit', verbose_name='Связанные привычки')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "place",
+                    models.CharField(
+                        blank=True,
+                        help_text="Укажите место",
+                        max_length=255,
+                        null=True,
+                        verbose_name="Место",
+                    ),
+                ),
+                (
+                    "time",
+                    models.TimeField(
+                        help_text="Укажите время выполнения привычки",
+                        verbose_name="Время",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        help_text="Укажите действие",
+                        max_length=255,
+                        verbose_name="Действие",
+                    ),
+                ),
+                (
+                    "is_pleasant_habit",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Отметьте, если привычка является приятной",
+                        verbose_name="Признак приятной привычки",
+                    ),
+                ),
+                (
+                    "periodicity",
+                    models.PositiveIntegerField(
+                        default=1,
+                        help_text="Через сколько дней повторять привычку",
+                        validators=[habits.validators.validate_periodicity],
+                        verbose_name="Периодичность (в днях)",
+                    ),
+                ),
+                (
+                    "reward",
+                    models.CharField(
+                        blank=True,
+                        help_text="Укажите вознаграждение",
+                        max_length=255,
+                        verbose_name="Вознаграждение",
+                    ),
+                ),
+                (
+                    "time_to_complete",
+                    models.DurationField(
+                        help_text="Укажите предполагаемое время на выполнение привычки",
+                        validators=[habits.validators.validate_time_to_complete],
+                        verbose_name="Время на выполнение",
+                    ),
+                ),
+                (
+                    "is_public",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Отметьте, если привычка общедоступна",
+                        verbose_name="Признак публичности",
+                    ),
+                ),
+                (
+                    "associated_habits",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Укажите связанные привычки",
+                        to="habits.habit",
+                        verbose_name="Связанные привычки",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Привычка',
-                'verbose_name_plural': 'Привычки',
-                'ordering': ['id'],
+                "verbose_name": "Привычка",
+                "verbose_name_plural": "Привычки",
+                "ordering": ["id"],
             },
         ),
     ]

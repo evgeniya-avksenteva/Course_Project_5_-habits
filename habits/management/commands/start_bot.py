@@ -5,8 +5,12 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
-                          CommandHandler, ContextTypes)
+from telegram.ext import (
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+)
 
 from habits.models import Habit
 
