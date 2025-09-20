@@ -9,6 +9,9 @@ from habits.validators import (
 
 
 class Habit(models.Model):
+    """Модель Habit представляет привычку пользователя с настройками времени, места, действия,
+    связями с другими привычками, вознаграждением и другими параметрами."""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -70,11 +73,18 @@ class Habit(models.Model):
     )
 
     def clean(self):
+        """Выполняет дополнительную валидацию модели перед сохранением:
+        - Очищает поле reward от лишних пробелов.
+        - Проверяет логику взаимного исключения reward и связанных привычек."""
+
         if self.reward is not None:
             self.reward = self.reward.strip()
         validate_associated_habits(self)
 
     def save(self, *args, **kwargs):
+        """Переопределённый метод сохранения объекта.
+        Перед сохранением выполняет полную валидацию модели методом full_clean()."""
+
         self.full_clean()
         super().save(*args, **kwargs)
 

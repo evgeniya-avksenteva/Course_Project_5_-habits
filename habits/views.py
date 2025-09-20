@@ -10,17 +10,22 @@ from .serializers import HabitSerializer
 
 # Список публичных привычек (только чтение)
 class PublicHabitListAPIView(generics.ListAPIView):
+    """API для получения списка публичных привычек. Доступ разрешён для всех пользователей.
+    Используется пагинация и сериализация HabitSerializer."""
+
     serializer_class = HabitSerializer
     pagination_class = HabitPagination
     permission_classes = [AllowAny]
-    # permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
+        """Возвращает queryset с фильтрацией только публичных привычек."""
         return Habit.objects.filter(is_public=True)
 
 
 # CRUD для привычек текущего пользователя с пагинацией
 class HabitViewSet(viewsets.ModelViewSet):
+    """Вьюсет CRUD для привычек пользователей с правами"""
+
     serializer_class = HabitSerializer
     pagination_class = HabitPagination
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnlyForPublic]
@@ -28,11 +33,12 @@ class HabitViewSet(viewsets.ModelViewSet):
     filterset_fields = ["is_public"]
 
     def get_queryset(self):
-        # Возвращаем все привычки, чтобы при доступе к detail DRF мог найти объект
-        # Проверка прав через IsOwnerOrReadOnlyForPublic контролирует доступ на изменение
+        """Возвращает все привычки сортированные по id. Проверка доступа происходит в permission-классе."""
+
         return Habit.objects.all().order_by("id")
 
     def perform_create(self, serializer):
+        """При создании привычки автоматически устанавливает пользователя из запроса."""
         serializer.save(user=self.request.user)
 
 
@@ -42,13 +48,19 @@ class MyHabitViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    """Вьюсет для CRUD операций только со своими привычками текущего пользователя.
+    Доступ открыт только для авторизованных пользователей."""
+
     serializer_class = HabitSerializer
     pagination_class = HabitPagination
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        """Возвращает привычки текущего пользователя, сортированные по id."""
+
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        # Показываем и создаём привычки только текущего пользователя
+        """При создании привычки сохраняет связь с текущим пользователем."""
+
         return Habit.objects.filter(user=self.request.user).order_by("id")

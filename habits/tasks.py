@@ -13,6 +13,11 @@ bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
 @shared_task
 def send_habit_reminders():
+    """Задача Celery для отправки напоминаний пользователям о выполнении привычек.
+    - Определяет текущее время и фильтрует привычки, время которых находится в пределах ±5 минут.
+    - Для каждой привычки отправляет сообщение в Telegram пользователю, если у него есть chat_id.
+    - Ловит и логирует ошибки при отправке сообщений."""
+
     now = timezone.now()
     start_time = now - timedelta(minutes=5)
     end_time = now + timedelta(minutes=5)

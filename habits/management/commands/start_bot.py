@@ -18,13 +18,23 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
+    """Команда управления Django для запуска Telegram бота.
+    Отвечает за инициализацию и обработку команд бота, включая регистрацию пользователей,
+    добавление и отображение привычек, а также взаимодействие с кнопками."""
+
     help = "Запуск Telegram бота"
 
     def handle(self, *args, **options):
+        """Основной метод для запуска Telegram бота. Инициализирует приложение Telegram,
+        настраивает обработчики команд и запускает цикл polling."""
+
         TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
         User = get_user_model()
 
         async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик команды /help. Отправляет пользователю список доступных команд
+            и пример использования."""
+
             help_text = (
                 "Доступные команды:\n"
                 "/start - Приветствие и инструкция по регистрации\n"
@@ -46,6 +56,9 @@ class Command(BaseCommand):
             user.save()
 
         async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик команды /register <email>. Привязывает telegram_chat_id текущего чата к пользователю с указанным email.
+            Если пользователь не найден - информирует об ошибке. """
+
             chat_id = update.effective_chat.id
             args = context.args  # аргументы после команды /register
 
@@ -73,6 +86,8 @@ class Command(BaseCommand):
                 await update.message.reply_text("Произошла ошибка, попробуйте позже.")
 
         async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик команды /start. Приветствует пользователя и даёт инструкцию по регистрации."""
+
             await update.message.reply_text(
                 "Привет! Чтобы получать напоминания, зарегистрируй аккаунт командой:\n"
                 "/register your_email@example.com"
@@ -86,6 +101,9 @@ class Command(BaseCommand):
             )  # или habits, смотря как называется реляция
 
         async def habits(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик команды /habits. Показывает список привычек пользователя с кнопками для удаления каждой.
+            Если пользователь не зарегистрирован, информирует об этом."""
+
             try:
                 user = await sync_to_async(User.objects.get)(
                     telegram_chat_id=update.effective_chat.id
@@ -120,6 +138,9 @@ class Command(BaseCommand):
 
         # Обработчик callback от кнопок
         async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик нажатий на inline-кнопки. Реагирует на команды удаления привычек, проверяет регистрацию пользователя,
+            удаляет привычку и обновляет сообщение."""
+
             query = update.callback_query
             await query.answer()
 
@@ -149,6 +170,9 @@ class Command(BaseCommand):
 
         # Команда для добавления привычки
         async def addhabit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Обработчик команды /addhabit. Добавляет новую привычку пользователя с указанным названием, временем напоминания и
+            длительностью выполнения задачи. Проверяет формат данных и регистрацию пользователя, информирует об ошибках."""
+
             args = context.args
             if len(args) < 3:
                 await update.message.reply_text(

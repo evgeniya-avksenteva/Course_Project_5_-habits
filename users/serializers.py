@@ -10,11 +10,9 @@ class RegisterSerializer(ModelSerializer):
         fields = ("email", "password")
         extra_kwargs = {"password": {"write_only": True}}
 
-    # def create(self, validated_data):
-    #     user = User.objects.create_user(**validated_data)
-    #     return user
-
     def create(self, validated_data):
+        """Создаёт нового пользователя с помощью метода менеджера create_user."""
+
         password = validated_data.pop("password")  # достаём пароль
         user = User.objects.create_user(**validated_data, password=password)
         return user

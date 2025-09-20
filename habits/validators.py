@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 def validate_periodicity(value):
+    """Валидатор для поля periodicity. Проверяет, что значение находится в диапазоне от 1 до 7 включительно."""
+
     if not (1 <= value <= 7):
         raise ValidationError(
             _("Периодичность должна быть от 1 до 7 дней включительно.")
@@ -10,6 +12,9 @@ def validate_periodicity(value):
 
 
 def validate_time_to_complete(value):
+    """Валидатор для поля time_to_complete.
+    Проверяет, что время положительно и не превышает 120 секунд (2 минуты)."""
+
     max_seconds = 120
     total_seconds = value.total_seconds()
     if total_seconds <= 0:
@@ -21,6 +26,12 @@ def validate_time_to_complete(value):
 
 
 def validate_associated_habits(habit_instance):
+    """Валидатор для взаимосвязанных полей reward и associated_habits.
+    Логика валидации:
+    - Нельзя одновременно указывать вознаграждение и связанные привычки.
+    - Связанные привычки должны иметь признак 'приятной привычки'.
+    - У приятной привычки не может быть вознаграждения и связанных привычек."""
+
     reward_filled = bool(habit_instance.reward and habit_instance.reward.strip())
     associated = habit_instance.associated_habits.all() if habit_instance.pk else []
 

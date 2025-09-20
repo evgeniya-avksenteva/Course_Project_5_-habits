@@ -8,6 +8,9 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, password=None, **extra_fields):
+        """Создаёт и возвращает пользователя с указанным email и паролем.
+        Нормализует email, устанавливает пароль и сохраняет пользователя."""
+
         if not email:
             raise ValueError("Email must be set")
         email = self.normalize_email(email)
@@ -17,6 +20,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """Создаёт и возвращает суперпользователя.
+        Устанавливает флаги is_staff, is_superuser и is_active в True."""
+
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
@@ -67,4 +73,6 @@ class User(AbstractUser):
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
+        """Возвращает строковое представление пользователя — его email."""
+
         return self.email

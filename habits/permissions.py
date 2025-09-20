@@ -2,12 +2,12 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsOwnerOrReadOnlyForPublic(BasePermission):
-    """
-    Пользователь видит только свои привычки и может управлять ими (CRUD).
-    Публичные привычки видны всем, но редактировать/удалять их нельзя.
-    """
+    """Пользователь видит только свои привычки и может управлять ими (CRUD).
+    Публичные привычки видны всем, но редактировать/удалять их нельзя."""
 
     def has_object_permission(self, request, view, obj):
+        """"Проверяет, имеет ли пользователь разрешение на выполнение действия с конкретным объектом."""
+
         if request.method in SAFE_METHODS:
             # SAFE_METHODS = GET, HEAD, OPTIONS
             return obj.is_public or obj.user == request.user
