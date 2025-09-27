@@ -16,9 +16,9 @@ WORKDIR /app
 # Переключаемся на пользователя app
 USER app
 
-# Обновляем pip и устанавливаем необходимые библиотеки из requirements.txt
-ENV PATH="/home/app/.local/bin:$PATH"
-COPY --chown=app:app requirements.txt ./
+# Копируем файл с зависимостями и устанавливаем их
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
