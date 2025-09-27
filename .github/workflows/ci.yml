@@ -91,7 +91,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./Course_Project_5_habits
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/courseproject5:latest
 

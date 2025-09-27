@@ -18,10 +18,7 @@ USER app
 
 # Копируем файл с зависимостями и устанавливаем их
 COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Копируем остальной код с нужными правами
 COPY --chown=app:app . .
