@@ -24,9 +24,119 @@
 
 2. Создать файл .env на основе .env.example и заполнить необходимые переменные окружения.
 
+3. Запустить сборку и запуск контейнеров Docker:
+```
+docker compose up -d --build
+```
+4. Выполнить миграции Django:
+```commandline
+docker compose exec backend python manage.py migrate
+```
+5. Собрать статические файлы:
+```commandline
+docker compose exec backend python manage.py collectstatic --noinput
+```
 
-3. Выполнить миграции Django:
-```python manage.py migrate```
+## Запуск тестов
+```commandline
+docker compose exec backend pytest
+```
+### Полезные команды
+1. Остановить контейнеры:
+```
+docker compose down
+```
+2. Просмотр логов:
+```commandline
+docker compose logs -f
+```
+
+### Dockerfile
+- Описание процесса сборки backend-образа с `Python 3.12` и `Poetry`.
+- Используется официальный образ `python:3.12-slim`.
+- Устанавливаются необходимые системные библиотеки для сборки зависимостей и работы с `PostgreSQL`.
+- Создается системный пользователь app с домашней директорией `/home/app`.
+- Создаются необходимые папки `/home/app`, `/app`, `/app/static` с правами пользователя app.
+- Рабочей директорией контейнера назначается `/app`.
+- Устанавливаются зависимости, используя опцию `--no-root` и устанавливая только основные зависимости.
+- Копируется остальной код проекта.
+- Контейнер запускает `Django develop` сервер командой: ```python manage.py runserver 0.0.0.0:8000``` от пользователя `app`.
+
+### Docker Compose
+В конфигурации `Docker Compose` определены следующие сервисы:
+
+- `db` — контейнер с `PostgreSQL`, с настройкой переменных окружения через `.env` и хранением данных в `volume pg_data`. Имеется `healthcheck` для проверки готовности базы.
+- `redis` — контейнер с `Redis` для брокера сообщений `Celery`, также с `healthcheck`.
+- `backend` — образ, строящийся из `Dockerfile`, запускающий миграции и затем `Django runserver` на порту 8000. Использует переменные окружения из `.env`. Зависит от `db` и `redis`.
+- `static_collector` — контейнер для сбора статических файлов `Django` (команда `collectstatic`), с `volume` для сохранения статики `django_static`. Запускается без перезапуска.
+- `celery_worker` — запускает `Celery worker` для обработки фоновых задач. Зависит от `db` и `redis`.
+- `celery_beat`— запускает `Celery beat` для периодических задач с хранением расписания.
+- `web` — контейнер с `Nginx`, который зависит от `backend` и `static_collector`. Монтируется локальный файл `nginx.conf` в контейнер и `shared volume django_static` для отдачи статики. Слушает 80 порт.
+
+#### Volumes
+- `pg_data` — хранит данные `PostgreSQL`.
+
+- `django_static` — хранит собранные статические файлы.
+
+- `celery_beat_data` — подкачка для расписания `Celery beat`.
+
+### Полезные команды Docker Compose
+1. Запустить все сервисы в фоне с созданием образов и миграциями:
+
+```
+docker compose up -d --build
+docker compose exec backend python manage.py migrate
+```
+2. Чтобы собрать статику (обычно автоматически выполняется в `static_collector`):
+```
+docker compose exec static_collector
+```
+3.Посмотреть логи сервиса:
+```
+docker compose logs -f backend
+```
+4. Остановить все сервисы и удалить `volumes`:
+```
+docker compose down -v
+```
+
+### Конфигурация Nginx (обратный прокси)
+`Nginx` настроен для работы в качестве обратного прокси-сервера перед вашим Django-приложением. Такая конфигурация позволяет:
+
+- Обеспечить доступ к проекту по стандартному HTTP-порту 80.
+- Отдавать статические файлы непосредственно через `Nginx` для повышения производительности.
+- Передавать остальные HTTP-запросы приложению Django на backend-сервер, который работает на порту 8000.
+
+Основные настройки `Nginx`:
+
+```
+upstream django_backend {
+    server backend:8000;
+}
+
+server {
+    listen 80;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location /static/ {
+        root /usr/share/nginx/html/;
+    }
+
+    location / {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_pass http://django_backend;
+    }
+}
+```
+- ``upstream django_backend`` — это блок, который определяет адрес `Django backend` в сети `Docker` (сервис с именем backend на порту 8000).
+- `location /static/` направляет запросы на отдачу статических файлов из папки `/usr/share/nginx/html/static` (которая синхронизируется с Django-статикой).
+Запросы на корневой путь / проксируются на `Django backend`.
+В прокси-запросы добавляются важные заголовки для правильной обработки IP клиента и хостовой информации в `Django`.
+
 
 ## Основные модели
 ### Habit
