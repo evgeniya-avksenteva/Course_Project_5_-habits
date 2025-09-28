@@ -43,7 +43,9 @@ services:
       - redis
 
   static_collector:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.static_collector
     entrypoint: [ "/bin/sh", "-c", "chown -R app:app /app/static && python manage.py collectstatic -c --noinput" ]
     env_file: .env
     volumes:
