@@ -110,8 +110,18 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yaml,.env,nginx.conf"
+          source: ".env,docker-compose.yaml,nginx.conf"
           target: /home/${{ secrets.SERVER_USER }}/courseproject5
+
+
+      - name: Verify .env on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: test -f /home/${{ secrets.SERVER_USER }}/courseproject5/.env && echo ".env exists"
+
 
       - name: List files on server
         uses: appleboy/ssh-action@master
