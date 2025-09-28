@@ -92,7 +92,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Course_Project_5_habits/Dockerfile
+          file: Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/courseproject5:latest
 
