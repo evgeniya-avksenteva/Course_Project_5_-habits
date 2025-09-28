@@ -103,14 +103,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Copy docker-compose.yaml, Dockerfile, Dockerfile.static_collector and nginx.conf to server
+      - name: Copy docker-compose.yaml, Dockerfile, Dockerfile.static_collector, requirements.txt and nginx.conf to server
         uses: appleboy/scp-action@master
         with:
           debug: true
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yaml,Dockerfile,Dockerfile.static_collector,nginx.conf"
+          source: "docker-compose.yaml,Dockerfile,Dockerfile.static_collector,requirements.txt,nginx.conf"
           target: /home/${{ secrets.SERVER_USER }}/courseproject5
 
 
