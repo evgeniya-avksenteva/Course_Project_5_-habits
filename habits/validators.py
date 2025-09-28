@@ -1,0 +1,56 @@
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+
+def validate_periodicity(value):
+    """Валидатор для поля periodicity. Проверяет, что значение находится в диапазоне от 1 до 7 включительно."""
+
+    if not (1 <= value <= 7):
+        raise ValidationError(
+            _("Периодичность должна быть от 1 до 7 дней включительно.")
+        )
+
+
+def validate_time_to_complete(value):
+    """Валидатор для поля time_to_complete.
+    Проверяет, что время положительно и не превышает 120 секунд (2 минуты)."""
+
+    max_seconds = 120
+    total_seconds = value.total_seconds()
+    if total_seconds <= 0:
+        raise ValidationError(_("Время выполнения должно быть положительным числом."))
+    if total_seconds > max_seconds:
+        raise ValidationError(
+            _("Время выполнения не должно превышать 120 секунд (2 минуты).")
+        )
+
+
+def validate_associated_habits(habit_instance):
+    """Валидатор для взаимосвязанных полей reward и associated_habits.
+    Логика валидации:
+    - Нельзя одновременно указывать вознаграждение и связанные привычки.
+    - Связанные привычки должны иметь признак 'приятной привычки'.
+    - У приятной привычки не может быть вознаграждения и связанных привычек."""
+
+    reward_filled = bool(habit_instance.reward and habit_instance.reward.strip())
+    associated = habit_instance.associated_habits.all() if habit_instance.pk else []
+
+    if reward_filled and associated:
+        raise ValidationError(
+            _("Нельзя указывать одновременно вознаграждение и связанные привычки.")
+        )
+
+    if associated:
+        for h in associated:
+            if not h.is_pleasant_habit:
+                raise ValidationError(_("Связанные привычки должны быть приятными."))
+
+    if habit_instance.is_pleasant_habit:
+        if reward_filled:
+            raise ValidationError(
+                _("У приятной привычки не может быть вознаграждения.")
+            )
+        if associated:
+            raise ValidationError(
+                _("У приятной привычки не может быть связанных привычек.")
+            )
