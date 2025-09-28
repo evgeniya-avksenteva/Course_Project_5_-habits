@@ -120,7 +120,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: test -f /home/${{ secrets.SERVER_USER }}/courseproject5/.env && echo ".env exists"
+          script: test−f/home/{{ secrets.SERVER_USER }}/courseproject5/.env && echo ".env exists" || (echo ".env missing" && exit 1)
 
 
       - name: List files on server
